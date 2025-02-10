@@ -4,7 +4,7 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
   fill?: string;
 }
 
-const Block: React.FC<LogoProps> = ({ fill = "#231F2082", ...props }) => (
+const Board: React.FC<LogoProps> = ({ fill = "#231F2082", ...props }) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -20,5 +20,5 @@ const Block: React.FC<LogoProps> = ({ fill = "#231F2082", ...props }) => (
       </svg>
     );
     
-    export default Block;
+    export default Board;
     

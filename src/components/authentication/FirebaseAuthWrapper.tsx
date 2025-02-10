@@ -60,7 +60,7 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
         >
           <div className="flex flex-col gap-y-2 items-center lg:items-start">
             <div className="flex gap-x-1 ">
-              <Logo className="h-8 w-8" fill="#7B1984"  />
+              <Logo className="h-8 w-8" fill="#7B1984" />
               <p className="text-[#7B1984] text-2xl font-[Urbanist] font-bold">
                 TaskBuddy
               </p>

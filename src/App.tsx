@@ -1,32 +1,20 @@
-import { signOut } from "@firebase/auth";
-import { auth } from "./firebase";
-import { Header,MainContext } from "./components/default";
-
+import { Header, MainContext } from "./components/default";
+import { useReducer } from "react";
+import { state as initialState } from "@/components/reducer/state";
+import { reducerFn } from "@/components/reducer/action";
+import { TaskbuddyProvider } from "./hooks/useTask";
 
 function App() {
-  console.log(auth.currentUser);
-  const onSignOutHandler = async () => {
-    signOut(auth)
-      .then(() => {
-        console.log("Signed out successfully");
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
-
-  console.log("App rendered");  
+  const [state, dispatch] = useReducer(reducerFn, initialState);
   return (
-    <>
-      <div className="min-h-screen max-h-fit  bg-white text-black lg:p-4 lg:pt-10 lg:px-8 overflow-y-auto">
-       <Header/>
-       <div className="mt-4"></div>
-       <MainContext/>
+    <TaskbuddyProvider value={{ state, dispatch }}>
+      <div className="min-h-screen  bg-white text-black  lg:p-4 lg:pt-10 lg:px-8 overflow-y-auto">
+        <Header />
+        <div className="mt-4"></div>
+        <MainContext />
       </div>
-      
-    </>
+    </TaskbuddyProvider>
   );
 }
 
 export default App;
-
