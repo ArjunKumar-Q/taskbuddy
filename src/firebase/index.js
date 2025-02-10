@@ -3,14 +3,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-
 const firebaseConfig = {
-  apiKey:import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:import.meta.env.VITE_FIREBASE_AUTHDOMAIN,
-  projectId:import.meta.env.VITE_FIREBASE_PROJECTID,
-  storageBucket:import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId:import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId:import.meta.env.VITE_FIREBASE_APPID,
+  apiKey: "AIzaSyAABxRGvIcJ6WhZQjwQFaVdx_qSDAVOvzs",
+  authDomain: "taskbuddy-ak.firebaseapp.com",
+  projectId: "taskbuddy-ak",
+  storageBucket: "taskbuddy-ak.firebasestorage.app",
+  messagingSenderId: "530055960318",
+  appId: "1:530055960318:web:312fdbedca0b8bf0f177af"
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

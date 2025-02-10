@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DialogHeader } from "../ui/dialog";
 import {
   DrawerTrigger,

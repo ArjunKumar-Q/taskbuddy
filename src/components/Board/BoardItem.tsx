@@ -4,7 +4,7 @@ import { Edit } from "../icons";
 
 const BoardItem = ({ item }: { item: any }) => {
   return (
-    <div className="w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1">
+    <div className="w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1 my-2">
       <div className="w-full  flex justify-between items-center ">
         <span className="font-mulish font-bold text-base">
           Interview with Design Team

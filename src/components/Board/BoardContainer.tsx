@@ -1,5 +1,5 @@
 import { DndContext } from "@dnd-kit/core"
-import { SortableContext,arrayMove } from "@dnd-kit/sortable"
+import { SortableContext, } from "@dnd-kit/sortable"
 import { cn } from "@/lib/utils"
 import BoardItem from "./BoardItem"
 
@@ -16,12 +16,6 @@ export function BoardContainer({title = "Todo",cardColor}:{title:string,cardColo
             </div>
             <div className="my-4"></div>
             <div className="w-full px-3 overflow-y-auto ">
-            <BoardItem item={{name:'arjun'}}/>
-            <BoardItem item={{name:'arjun'}}/>
-            <BoardItem item={{name:'arjun'}}/>
-            <BoardItem item={{name:'arjun'}}/>
-            <BoardItem item={{name:'arjun'}}/>
-            <BoardItem item={{name:'arjun'}}/>
             <BoardItem item={{name:'arjun'}}/>
             <BoardItem item={{name:'arjun'}}/>
             <BoardItem item={{name:'arjun'}}/>

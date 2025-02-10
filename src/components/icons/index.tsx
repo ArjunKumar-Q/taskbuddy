@@ -10,16 +10,4 @@ import Check from "./Check";
 import More from "./More";
 import Edit from "./Edit";
 
-export {
-  Logo,
-  List,
-  Board,
-  Logout,
-  Search,
-  Enter,
-  Calender,
-  Grip,
-  Check,
-  More,
-  Edit,
-};
+export { Logo, List, Board,Edit, Logout, Search, Enter, Calender, Grip, Check, More };
