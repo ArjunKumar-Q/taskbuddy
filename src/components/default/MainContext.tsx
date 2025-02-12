@@ -3,6 +3,14 @@ import { Accordion } from "../ui/accordion";
 import useTask from "@/hooks/useTask";
 import { BoardContainer } from "../Board/BoardContainer";
 
+const meta = {
+  title: "",
+  bgColor: "",
+  caretColor: "[&>svg]:",
+  isTodoContainer: false,
+  queryToken: "",
+};
+
 export function MainContext() {
   const [state] = useTask();
 
@@ -11,22 +19,31 @@ export function MainContext() {
       <>
         <div className="my-8"></div>
         <div className="   w-full  px-4 py-2 lg:p-0 ">
-          <Accordion type="multiple" className="flex flex-col gap-y-6 ">
+          <Accordion type="multiple" className="flex flex-col gap-y-6 " >
             <ListContainer
-              title="Todo"
-              bgColor="bg-[#FAC3FF]"
-              caretColor="text-[#3E0344]"
-              isTodoContainer
+              meta={{
+                title: "Todo",
+                bgColor: "bg-[#FAC3FF]",
+                caretColor: "text-[#3E0344]",
+                isTodoContainer: true,
+                queryToken: "todo",
+              }}
             />
             <ListContainer
-              title="In-Progress"
-              bgColor="bg-[#85D9F1]"
-              caretColor="text-[#3E0344]"
+              meta={{
+                title: "In-Progress",
+                bgColor: "bg-[#85D9F1]",
+                caretColor: "text-[#3E0344]",
+                queryToken: "in-progress",
+              }}
             />
             <ListContainer
-              title="Completed"
-              bgColor="bg-[#CEFFCC]"
-              caretColor="text-[#0D7A0A]"
+              meta={{
+                title: "Completed",
+                bgColor: "bg-[#CEFFCC]",
+                caretColor: "text-[#0D7A0A]",
+                queryToken: "completed",
+              }}
             />
           </Accordion>
         </div>

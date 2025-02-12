@@ -1,13 +1,40 @@
-import {  MoreHorizontalIcon, Trash2 } from "lucide-react";
+import { MoreHorizontalIcon, Trash2 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Edit } from "../icons";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { CSSProperties } from "react";
+
 const BoardItem = ({ item }: { item: any }) => {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: item });
+
+  console.log(transition)
+
+  const style: CSSProperties = {
+    opacity: isDragging ? 0.4 : undefined,
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
   return (
-    <div className="w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1 my-2">
+    <div
+      className="w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1 my-2"
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    >
       <div className="w-full  flex justify-between items-center ">
         <span className="font-mulish font-bold text-base">
-          Interview with Design Team
+          Interview with Design Team - {item}
         </span>
         <Popover>
           <PopoverTrigger>

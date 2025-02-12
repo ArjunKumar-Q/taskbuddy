@@ -8,12 +8,21 @@ import { Grip, Check, Edit } from "@/components/icons";
 import { Trash2 } from "lucide-react";
 import { More } from "../icons";
 
-import type { CSSProperties} from "react";
+import type { CSSProperties } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+type Task = {
+  title: string;
+  description?: string;
+  category: string;
+  status: string;
+  dueDate: string;
+  files?: string[];
+};
 
-function ListItem({ item }: { item: any }) {
+function ListItem({ task }: { task: Task }) {
+  const id = task.title;
   const {
     attributes,
     isDragging,
@@ -22,13 +31,15 @@ function ListItem({ item }: { item: any }) {
     setActivatorNodeRef,
     transform,
     transition,
-  } = useSortable({ id:item });
+  } = useSortable({ id: id });
 
   const style: CSSProperties = {
     opacity: isDragging ? 0.4 : undefined,
     transform: CSS.Translate.toString(transform),
     transition,
   };
+
+  // console.log(new Date(task.dueDate.seconds));
 
   return (
     <div
@@ -43,14 +54,23 @@ function ListItem({ item }: { item: any }) {
         </button>
         <Check />
         <span className="font-mulish font-medium text-sm w-full truncate ">
-          list itemm - {item}{" "}
+          {task.title}
         </span>
       </div>
-      <div className="hidden sm:block sm:w-1/4 md:w-1/5">today</div>
+      <div className="hidden sm:block sm:w-1/4 md:w-1/5">
+        {new Date(task.dueDate?.seconds)
+          .toISOString()
+          .split("T")[0]
+          .split("-")
+          .reverse()
+          .join("-")}
+      </div>
       <div className="hidden md:block w-1/5">
         <Popover>
           <PopoverTrigger>
-            <button className="h-7 bg-[#DDDADD] px-2 rounded-md">TODO</button>
+            <button className="h-7 bg-[#DDDADD] px-2 rounded-md">
+              {task.status}
+            </button>
           </PopoverTrigger>
           <PopoverContent
             className="bg-[#fff9f9] border border-[#7B1984]/15 w-32 p-1 "
@@ -72,7 +92,7 @@ function ListItem({ item }: { item: any }) {
         </Popover>
       </div>
       <div className="hidden md:flex w-1/5 justify-between pr-4">
-        <span className="font-mulish text-sm font-medium">Work</span>
+        <span className="font-mulish text-sm font-medium">{task.category}</span>
         <Popover>
           <PopoverTrigger>
             <span>

@@ -1,20 +1,30 @@
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import google from "../../assets/google.svg";
 import preview from "../../assets/preview.svg";
+import logo from "../../assets/logo.svg";
 import Logo from "../icons/Logo";
 
-import type { ReactNode } from "react";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
-import { useEffect, useState, useActionState, useTransition } from "react";
+import {
+  useEffect,
+  useState,
+  useActionState,
+  useTransition,
+  type ReactNode,
+} from "react";
+import { useToast } from "@/hooks/use-toast";
+
 
 function FirebaseWrapper({ children }: { children: ReactNode }) {
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // To prevent flickering between states
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,12 +40,30 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
+        const userID = result.user.uid;
 
-        // You can get the token or user info if needed
-        const user = result.user;
-        return { success: true, message: `Welcome, ${user.displayName}!` };
+        const docRef = doc(db, "users", userID);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          setDoc(docRef, {
+            name: result.user.displayName,
+            todos: {
+              todo: [],
+              completed: [],
+              "in-progress": [],
+            },
+          });
+        }
+
+        return { success: true };
       } catch (error) {
-        return { success: false, message: error.message };
+        console.log(error);
+        toast({
+          title: "Something went Wrong",
+          description: error.message,
+        });
+        return { success: false };
       }
     },
     { success: null, message: "" }
@@ -60,7 +88,8 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
         >
           <div className="flex flex-col gap-y-2 items-center lg:items-start">
             <div className="flex gap-x-1 ">
-              <Logo className="h-8 w-8" fill="#7B1984"  />
+              {/* <img src={logo} alt="TaskBuddy"  /> */}
+              <Logo className="h-8 w-8 fill-[#7b1984] " />
               <p className="text-[#7B1984] text-2xl font-[Urbanist] font-bold">
                 TaskBuddy
               </p>

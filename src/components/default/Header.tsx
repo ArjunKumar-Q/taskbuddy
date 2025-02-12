@@ -8,21 +8,32 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import Task from "../Task/TaskCreation";
 
+import { signOut } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+
 export function Header() {
   const [state, dispatch] = useTask();
+  const { toast } = useToast();
 
   const viewHandler = (e) => {
-      dispatch({
+    dispatch({
       type: "VIEW_CHANGE",
       payload: {
         value: e.currentTarget.id,
       },
+    });
+  };
+
+  const signOutHandler = () => {
+    signOut(auth).then(() => {
+      toast({
+        title: "Logged out successfully",
+      });
     });
   };
 
@@ -50,13 +61,16 @@ export function Header() {
                 {auth.currentUser.displayName}
               </span>
             </PopoverTrigger>
-            <PopoverContent className="flex justify-end p-0 bg-transparent border-none outline-none shadow-none w-fit">
+            <PopoverContent
+              className="flex justify-end p-0 rounded-xl border-none outline-none shadow-none w-fit mr-4 lg:mr-8 mt-2 "
+              // side={window.innerWidth > 1024 ? "bottom" : "left"}
+            >
               <button
-                // onClick={onSignOutHandler}
-                className="h-10 w-30  text-black flex items-center justify-center gap-x-2 border border-[#7B1984] bg-[#7B1984]/10 rounded-xl p-4 "
+                onClick={signOutHandler}
+                className=" h-10 w-30  text-black flex items-center justify-center gap-x-2 border border-[#7B1984] bg-[#7B1984]/10 rounded-xl p-4 "
               >
                 <Logout className="h-4 w-4" />
-                <span className="font-[Mulish] font-semibold text-black text-sm">
+                <span className="font-[Mulish] font-semibold text-black text-sm ">
                   Logout
                 </span>
               </button>
@@ -111,19 +125,6 @@ export function Header() {
               </span>
             </button>
           </div>
-          {/* <div>
-          <div>
-            <button
-              // onClick={onSignOutHandler}
-              className="h-10 w-30  text-black flex items-center justify-center gap-x-2 border border-[#7B1984] bg-[#7B1984]/10 rounded-xl p-4 "
-            >
-              <Logout className="h-4 w-4" />
-              <span className="font-[Mulish] font-semibold text-black text-sm">
-                Logout
-              </span>
-            </button>
-          </div>
-        </div> */}
         </div>
 
         <div
@@ -144,14 +145,17 @@ export function Header() {
                   >
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20" sideOffset={-15}>
+                  <SelectContent
+                    className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20"
+                    sideOffset={-15}
+                  >
                     <SelectGroup title="Category">
                       <SelectItem value="apple">Work</SelectItem>
                       <SelectItem value="apple">Personal</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <Select >
+                <Select>
                   <SelectTrigger
                     name="due-date-select-btn"
                     id="due-date-select"
@@ -159,7 +163,10 @@ export function Header() {
                   >
                     <SelectValue placeholder="Due Date" />
                   </SelectTrigger>
-                  <SelectContent className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20 " sideOffset={-15}>
+                  <SelectContent
+                    className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20 "
+                    sideOffset={-15}
+                  >
                     <SelectGroup title="Due Date">
                       <SelectItem value="apple">Today</SelectItem>
                       <SelectItem value="banana">Tomorrow</SelectItem>
