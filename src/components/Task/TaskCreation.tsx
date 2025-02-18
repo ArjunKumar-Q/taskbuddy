@@ -26,43 +26,81 @@ import {
 } from "../ui/select";
 import useDesktop from "@/hooks/useDesktop";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { Auth } from "@/components/authentication/RequestFunctions";
+import { db } from "@/firebase";
+import { Task } from "../List/ListItem";
+import { User } from "firebase/auth";
+
 // import { storage } from "@/firebase";
-
 // import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { createEditor } from "slate";
-import { Slate, Editable, withReact } from "slate-react";
-// TypeScript users only add this code
-import { BaseEditor, Descendant } from "slate";
-import { ReactEditor } from "slate-react";
 
-type CustomElement = { type: "paragraph"; children: CustomText[] };
-type CustomText = { text: string };
-
-declare module "slate" {
-  interface CustomTypes {
-    Editor: BaseEditor & ReactEditor;
-    Element: CustomElement;
-    Text: CustomText;
-  }
-}
-
-const Task = () => {
+const TaskForm = () => {
   const [isDesktop] = useDesktop();
   const [open, setOpen] = useState(false);
   const [formState, setFormState] = useState({
-    title: "",
-    description: "",
-    category: "",
-    status: "",
-    dueDate: "",
-    files: [],
+    title: undefined,
+    description: undefined,
+    category: undefined,
+    status: "todo",
+    dueDate: undefined,
+    // files: [],
   });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: addTask,
+    onSuccess: () => {
+      toast({
+        title: "New Task added successfully.",
+      });
+      setFormState({
+        title: undefined,
+        description: undefined,
+        category: undefined,
+        status: "todo",
+        dueDate: undefined,
+      });
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: [formState.status] });
+    },
+  });
+
+  async function addTask(taskData: Task) {
+    await updateDoc(doc(db, "users", (Auth.currentUser as User)?.uid), {
+      [`todos.${taskData.status}`]: arrayUnion({
+        ...taskData,
+      }),
+    });
+    return { success: true };
+  }
+
+  function onChangeHandler(e) {
+    setFormState((prev) => {
+      const { value, id } = e.target;
+      return {
+        ...prev,
+        [id]: value,
+      };
+    });
+  }
 
   const submitHandler = (e) => {
     e.preventDefault();
-    const form = document.getElementById("create-task-form");
-    const formData = new FormData(form);
-    console.log(...formData.entries());
+    if (
+      formState.title === undefined ||
+      formState.category === undefined ||
+      formState.dueDate === undefined
+    ) {
+      toast({
+        title: "Fill all the required field's.",
+      });
+    } else {
+      mutate(formState);
+    }
   };
 
   if (isDesktop) {
@@ -86,13 +124,20 @@ const Task = () => {
                 name="task-title"
                 className="h-10 rounded-lg bg-[#fafafa] font-mulish font-normal text-sm text-[#1E212A] border border-black/15 pl-4"
                 placeholder="Task Title"
-                defaultValue={formState.title}
+                value={formState.title}
+                id="title"
+                onChange={onChangeHandler}
                 required
               />
-              <div
+              <textarea
                 className="h-40 rounded-lg bg-[#fafafa] font-mulish font-normal text-sm text-[#1E212A] border border-black/15 pl-4 resize-none p-2"
-                id="task-description"
-              ></div>
+                id="description"
+                aria-placeholder="Description"
+                placeholder={"Description"}
+                onChange={onChangeHandler}
+                value={formState.description}
+              ></textarea>
+
               <div className="flex ">
                 <div className="flex flex-col w-1/3 gap-y-2">
                   <div className="font-mulish font-semibold text-xs text-[#666666]">
@@ -106,6 +151,16 @@ const Task = () => {
                       id="task-category-work"
                       className="peer/category-one hidden"
                       value={"work"}
+                      onClick={() => {
+                        setFormState((prev) => {
+                          return {
+                            ...prev,
+                            category: "work",
+                          };
+                        });
+                      }}
+                      checked={formState.category === "work"}
+                      required
                     />
                     <label
                       htmlFor="task-category-work"
@@ -119,6 +174,16 @@ const Task = () => {
                       id="task-category-personal"
                       className="peer/category-two hidden"
                       value={"personal"}
+                      onClick={() => {
+                        setFormState((prev) => {
+                          return {
+                            ...prev,
+                            category: "personal",
+                          };
+                        });
+                      }}
+                      required
+                      checked={formState.category === "personal"}
                     />
                     <label
                       htmlFor="task-category-personal"
@@ -135,9 +200,11 @@ const Task = () => {
                   </div>
                   <input
                     type="date"
-                    name=""
-                    id=""
-                    className=" h-7 md:h-8 rounded-lg w-4/5 text-xs md:text-sm font-[Mulish] font-semibold text-black/60 border border-black/20 bg-[#fafafa] [&>svg]:text-black [&>svg]:size-3  "
+                    name="date"
+                    id="dueDate"
+                    className=" h-7 md:h-8 rounded-lg w-4/5 text-xs md:text-sm font-[Mulish] font-semibold text-black/60 border border-black/20 bg-[#fafafa] [&>svg]:text-black [&>svg]:size-3 px-2 "
+                    value={formState.dueDate}
+                    onChange={onChangeHandler}
                     required
                   />
                 </div>
@@ -146,7 +213,18 @@ const Task = () => {
                     {" "}
                     Task Status*
                   </div>
-                  <Select required>
+                  <Select
+                    required
+                    value={formState.status}
+                    onValueChange={(value) => {
+                      setFormState((prev) => {
+                        return {
+                          ...prev,
+                          status: value,
+                        };
+                      });
+                    }}
+                  >
                     <SelectTrigger
                       name="category-select-btn"
                       id="category-select"
@@ -158,16 +236,14 @@ const Task = () => {
                       />
                     </SelectTrigger>
                     <SelectContent className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20">
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
-                      <SelectItem value="blueberry">Blueberry</SelectItem>
-                      <SelectItem value="grapes">Grapes</SelectItem>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
+                      <SelectItem value="todo">Todo</SelectItem>
+                      <SelectItem value="in-progress">In-progress</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div className="flex flex-col gap-y-2 ">
+              {/* <div className="flex flex-col gap-y-2 ">
                 <span className="font-mulish font-semibold text-sm text-[#666666]">
                   Attachment
                 </span>
@@ -197,15 +273,9 @@ const Task = () => {
                     }
                   }}
                 />
-                {/* {
-                  true && (
-                    <div>
-
-                    </div>
-                  )
-                } */}
+                
                 <div className="h-48"></div>
-              </div>
+              </div> */}
             </div>
           </form>
           <DialogFooter className="bg-[#F1F1F1] w-full h-16 flex flex-end  items-center px-3">
@@ -253,4 +323,4 @@ const Task = () => {
   );
 };
 
-export default Task;
+export default TaskForm;

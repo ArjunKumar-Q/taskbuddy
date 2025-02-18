@@ -14,7 +14,7 @@ function App() {
   return (
     <QueryClientProvider client={RequestClient}>
       <TaskbuddyProvider value={{ state, dispatch }}>
-        <div className="min-h-screen max-h-fit  bg-white text-black lg:p-4 lg:pt-10 lg:px-8 overflow-y-auto">
+        <div className="min-h-screen max-h-fit  bg-white text-black lg:p-4 lg:pt-10 lg:px-8 overflow-y-auto relative">
           <Header />
           <div className="mt-4"></div>
           <MainContext />

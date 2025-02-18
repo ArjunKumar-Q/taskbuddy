@@ -1,9 +1,8 @@
-
-
-
 export const state = {
-    viewType : 'list',
-    searchQuery:null,
-    category:null,
-    dueDate:null,
-}
+  viewType: "list",
+  searchQuery: undefined,
+  category: undefined,
+  dueDate: undefined,
+  sortDate: true,
+  selectedTasks: [],
+};

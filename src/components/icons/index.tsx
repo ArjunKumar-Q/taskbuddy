@@ -9,5 +9,19 @@ import Grip from "./Grip";
 import Check from "./Check";
 import More from "./More";
 import Edit from "./Edit";
+import Sort from "../icons/Sort";
 
-export { Logo, List, Board,Edit, Logout, Search, Enter, Calender, Grip, Check, More };
+export {
+  Logo,
+  List,
+  Board,
+  Edit,
+  Logout,
+  Search,
+  Enter,
+  Calender,
+  Grip,
+  Check,
+  More,
+  Sort,
+};

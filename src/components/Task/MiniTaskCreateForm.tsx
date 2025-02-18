@@ -15,17 +15,18 @@ import { useState } from "react";
 import { Calendar as ShadCalender } from "../ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { setDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db, app } from "@/firebase";
 import { getAuth } from "firebase/auth";
+import { cn } from "@/lib/utils";
+import type { Task } from "../List/ListItem";
 
 const Auth = getAuth(app);
 
-async function addTodo(todoData) {
+async function addTask(taskData: Task) {
   await updateDoc(doc(db, "users", Auth.currentUser?.uid), {
-    "todos.todo": arrayUnion({
-      // title: "New Todo",
-      ...todoData,
+    [`todos.${taskData.status}`]: arrayUnion({
+      ...taskData,
     }),
   });
   return { success: true };
@@ -38,16 +39,19 @@ const initialState = {
   category: "",
 };
 
-function MiniTaskForm() {
-  const [state, setState] = useState({
+function MiniTaskForm({ borderless }: { borderless?: boolean }) {
+  const [state, setState] = useState<Task>({
     ...initialState,
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: addTodo,
+    mutationFn: addTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todo"] });
+      setState({
+        ...initialState,
+      });
+      queryClient.invalidateQueries({ queryKey: [state.status] });
     },
     onError: (error) => {
       console.error("Error adding user:", error.message);
@@ -64,6 +68,7 @@ function MiniTaskForm() {
   };
 
   const selectChangeHandler = (id: string, value: string | Date) => {
+    console.log(value);
     setState((prev) => {
       return {
         ...prev,
@@ -85,27 +90,36 @@ function MiniTaskForm() {
         description: "Need to fill all the details.",
       });
     } else {
-      console.log(state);
       mutation.mutate(state);
       toast({
         title: "New Todo successfully added",
-      });
-      setState({
-        ...initialState,
       });
     }
   };
 
   return (
     <Accordion type="single" collapsible className="hidden md:block">
-      <AccordionItem value="mini-task-form">
-        <AccordionTrigger className=" h-12 w-full no-underline px-10 text-[#2F2F2F] font-mulish font-medium border-b border-black/10 [&>svg]:hidden">
+      <AccordionItem
+        value="mini-task-form"
+        className={cn("", borderless && "border-b-0")}
+      >
+        <AccordionTrigger
+          className={cn(
+            " h-12 w-full no-underline px-10 text-[#2F2F2F] font-mulish font-medium border-b border-black/10 [&>svg]:hidden ",
+            borderless && "border-none"
+          )}
+        >
           <p className="flex gap-x-2">
             <span className="rotate-45">&#10006;</span>
             Add Task
           </p>
         </AccordionTrigger>
-        <AccordionContent className="border-b  border-black/10 px-10 py-2">
+        <AccordionContent
+          className={cn(
+            " border-black/10 px-10 py-2 border-b",
+            borderless && "border-none"
+          )}
+        >
           <form
             method="POST"
             id="mini-task-creation-form"
@@ -129,17 +143,16 @@ function MiniTaskForm() {
                   <div>
                     <button
                       type="button"
-                      className="flex gap-x-2 w-28  items-center justify-center h-7 bg-transparent font-mulish font-medium text-xs border border-black/20 rounded-full px-2 text-[#606060]"
+                      className="flex gap-x-2 w-28  items-center  h-7 bg-transparent font-mulish font-medium text-xs border border-black/20 rounded-full px-2 text-[#606060]"
                     >
-                      <Calender />{" "}
-                      {state.dueDate
-                        ? new Date(state.dueDate)
-                            .toISOString()
-                            .split("T")[0]
-                            .split("-")
-                            .reverse()
-                            .join("-")
-                        : "Add Date"}
+                      <Calender className="w-1/5" />{" "}
+                      <span className="w-4/5">
+                        {state.dueDate
+                          ? new Date().toLocaleDateString() == state.dueDate
+                            ? "Today"
+                            : state.dueDate
+                          : "Add Date"}
+                      </span>
                     </button>
                   </div>
                 </PopoverTrigger>
@@ -149,9 +162,14 @@ function MiniTaskForm() {
                   align="start"
                 >
                   <ShadCalender
-                    selected={state.dueDate}
+                    selected={
+                      state.dueDate ? new Date(state.dueDate) : undefined
+                    }
                     className="bg-white rounded-md mt-3"
-                    onDayClick={(day) => selectChangeHandler("dueDate", day)}
+                    onDayClick={(day) => {
+                      // console.log(day.toLocaleDateString());
+                      selectChangeHandler("dueDate", day.toLocaleDateString());
+                    }}
                   />
                 </PopoverContent>
               </Popover>
@@ -171,7 +189,7 @@ function MiniTaskForm() {
                           type="button"
                           className=" h-7 md:h-8 rounded-full w-28 text-xs md:text-sm font-[Mulish] font-semibold text-black/60 border border-black/20"
                         >
-                          {state.status}
+                          {state.status.toUpperCase()}
                         </button>
                       ) : (
                         <button
@@ -189,14 +207,14 @@ function MiniTaskForm() {
                     side={state.status !== "" ? "bottom" : "right"}
                     alignOffset={20}
                   >
-                    {["TO-DO", "IN-PROGRESS", "COMPLETED"].map((item) => {
+                    {["todo", "in-progress", "completed"].map((item) => {
                       return (
                         <SelectItem
                           key={item}
                           value={item}
                           className="font-mulish font-semibold text-sm h-8 shadow-none  flex items-center w-full rounded-md p-1 focus:bg-[#ffe6e6] [&>.symbol]:hidden"
                         >
-                          {item}
+                          {item.toUpperCase()}
                         </SelectItem>
                       );
                     })}
@@ -257,7 +275,7 @@ function MiniTaskForm() {
                 type="submit"
                 form="mini-task-creation-form"
                 className="bg-[#7B1984] w-20 h-7  flex items-center gap-x-2 justify-center rounded-full text-sm"
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
               >
                 <span className="text-white font-mulish font-bold text-xs">
                   ADD

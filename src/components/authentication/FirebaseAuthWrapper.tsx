@@ -19,7 +19,6 @@ import {
 } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-
 function FirebaseWrapper({ children }: { children: ReactNode }) {
   const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState(null);
@@ -76,7 +75,9 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading while checking auth state
+    return (
+      <div className="w-full h-screen grid place-items-center">Loading...</div>
+    ); // Show loading while checking auth state
   }
 
   if (!user) {

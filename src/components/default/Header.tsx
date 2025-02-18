@@ -11,14 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Task from "../Task/TaskCreation";
+import TaskForm from "../Task/TaskCreation";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
 
 import { signOut } from "firebase/auth";
-import { useToast } from "@/hooks/use-toast";
+import { FilterX } from "lucide-react";
 
 export function Header() {
   const [state, dispatch] = useTask();
   const { toast } = useToast();
+
+  const resetHandler = () => {
+    dispatch({
+      type: "RESET",
+    });
+  };
 
   const viewHandler = (e) => {
     dispatch({
@@ -44,7 +52,7 @@ export function Header() {
         id="row-1"
       >
         <div className="flex gap-x-1 ">
-          <Logo className="h-7 w-7 hidden lg:Board" />
+          <Logo className="h-6 w-6 hidden lg:block" />
           <p className="text-[#2F2F2F] text-xl font-[Mulish] font-semibold">
             TaskBuddy
           </p>
@@ -61,10 +69,7 @@ export function Header() {
                 {auth.currentUser.displayName}
               </span>
             </PopoverTrigger>
-            <PopoverContent
-              className="flex justify-end p-0 rounded-xl border-none outline-none shadow-none w-fit mr-4 lg:mr-8 mt-2 "
-              // side={window.innerWidth > 1024 ? "bottom" : "left"}
-            >
+            <PopoverContent className="flex justify-end p-0 rounded-xl border-none outline-none shadow-none w-fit mr-4 lg:mr-8 mt-2 ">
               <button
                 onClick={signOutHandler}
                 className=" h-10 w-30  text-black flex items-center justify-center gap-x-2 border border-[#7B1984] bg-[#7B1984]/10 rounded-xl p-4 "
@@ -136,8 +141,19 @@ export function Header() {
               <span className="font-[Mulish] font-semibold text-sm text-black/60">
                 Filter by:
               </span>
-              <div className="flex gap-x-2 ">
-                <Select>
+              <div className="flex gap-x-3 items-center">
+                <Select
+                  value={state.category}
+                  onValueChange={(value) => {
+                    console.log(value);
+                    dispatch({
+                      type: "CATEGORY",
+                      payload: {
+                        value: value == undefined ? "" : value,
+                      },
+                    });
+                  }}
+                >
                   <SelectTrigger
                     name="category-select-btn"
                     id="category-select"
@@ -150,12 +166,12 @@ export function Header() {
                     sideOffset={-15}
                   >
                     <SelectGroup title="Category">
-                      <SelectItem value="apple">Work</SelectItem>
-                      <SelectItem value="apple">Personal</SelectItem>
+                      <SelectItem value="Work">Work</SelectItem>
+                      <SelectItem value="Personal">Personal</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <Select>
+                <Select value={state.dueDate}>
                   <SelectTrigger
                     name="due-date-select-btn"
                     id="due-date-select"
@@ -174,6 +190,16 @@ export function Header() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {(state.category || state.dueDate) && (
+                  <Button
+                    className="rounded-full group size-8"
+                    variant={"outline"}
+                    size={"icon"}
+                    onClick={resetHandler}
+                  >
+                    <FilterX className="stroke-[#231F2082] size-4 group-hover:stroke-black" />
+                  </Button>
+                )}
               </div>
             </div>
             <div className="relative">
@@ -183,6 +209,14 @@ export function Header() {
                 id="search-bar"
                 className="w-full md:w-51 border h-8 md:h-10 rounded-full pl-8 pr-4 outline-none text-sm font-[Mulish] font-semibold text-black/60 border-black/20 "
                 placeholder="search"
+                onChange={(e) => {
+                  dispatch({
+                    type: "SEARCH",
+                    payload: {
+                      value: e.target.value === "" ? undefined : e.target.value,
+                    },
+                  });
+                }}
               />
               <Search
                 className="absolute top-1/2 left-3  -translate-y-1/2"
@@ -191,10 +225,7 @@ export function Header() {
             </div>
           </div>
           <div className="flex justify-end md:w-1/5 lg:w-1/6 xl:w-1/12 items-center mr-4 lg:mr-0">
-            <Task />
-            {/* <button className=" h-8 md:h-10 w-24 text-xs md:w-full  bg-[#7B1984] text-white rounded-full font-[Mulish] font-bold">
-              Add Task
-            </button> */}
+            <TaskForm />
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 import React from "react";
 
-interface LogoProps extends React.SVGProps<SVGSVGElement> {
-  fill?: string;
-}
-
-const Logout: React.FC<LogoProps> = ({ fill = "#2F2F2F", ...props }) => ( <svg
+const Logout: React.FC<React.SVGProps<SVGSVGElement>> = ({
+  fill = "#2F2F2F",
+  ...props
+}) => (
+  <svg
     xmlns="http://www.w3.org/2000/svg"
     width="15"
     height="15"
@@ -20,6 +20,7 @@ const Logout: React.FC<LogoProps> = ({ fill = "#2F2F2F", ...props }) => ( <svg
       fill={fill}
       d="M14.297 1.172H5.39a.703.703 0 0 0-.703.703v2.812a.703.703 0 0 0 1.406 0V2.578h7.5v9.844h-7.5v-2.11a.703.703 0 0 0-1.407 0v2.813c0 .388.315.703.704.703h8.906a.703.703 0 0 0 .703-.703V1.875a.703.703 0 0 0-.703-.703"
     ></path>
-  </svg>)
-  
-  export default Logout;
+  </svg>
+);
+
+export default Logout;

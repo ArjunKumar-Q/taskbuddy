@@ -5,8 +5,10 @@ import { Edit } from "../icons";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CSSProperties } from "react";
+import { Task } from "../List/ListItem";
+import { cn } from "@/lib/utils";
 
-const BoardItem = ({ item }: { item: any }) => {
+const BoardItem = ({ task }: { task: Task }) => {
   const {
     attributes,
     isDragging,
@@ -14,27 +16,35 @@ const BoardItem = ({ item }: { item: any }) => {
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: item });
+  } = useSortable({ id: task.title });
 
-  console.log(transition)
+  console.log(transition);
 
   const style: CSSProperties = {
-    opacity: isDragging ? 0.4 : undefined,
+    opacity: isDragging ? 0 : undefined,
     transform: CSS.Translate.toString(transform),
     transition,
   };
 
   return (
     <div
-      className="w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1 my-2"
+      className={cn(
+        "w-full h-28 bg-white rounded-xl border border-[#58575128] flex flex-col justify-between px-3 pt-3 pb-1 my-2 ",
+        isDragging && "shadow-md"
+      )}
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
     >
       <div className="w-full  flex justify-between items-center ">
-        <span className="font-mulish font-bold text-base">
-          Interview with Design Team - {item}
+        <span
+          className={cn(
+            "font-mulish font-bold text-base",
+            task.status.toLowerCase() === "completed" && "line-through"
+          )}
+        >
+          {task.title}
         </span>
         <Popover>
           <PopoverTrigger>
@@ -65,10 +75,10 @@ const BoardItem = ({ item }: { item: any }) => {
       </div>
       <div className="h-auto flex justify-between items-center">
         <span className="text-[10px] font-mulish font-semibold text-[#7a7a7a]">
-          Work
+          {task.category}
         </span>
         <span className="text-[10px] font-mulish font-semibold text-[#7a7a7a]">
-          Date
+          {task.dueDate}
         </span>
       </div>
     </div>
