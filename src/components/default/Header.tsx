@@ -108,7 +108,7 @@ export function Header() {
                 List
               </span>
             </button>
-            <button
+            {/* <button
               className={cn(
                 "flex gap-x-1 items-end mb-[1px]",
                 state.viewType === "board" && "border-b border-black mb-0"
@@ -128,7 +128,7 @@ export function Header() {
               >
                 Board
               </span>
-            </button>
+            </button> */}
           </div>
         </div>
 

@@ -4,11 +4,12 @@ import preview from "../../assets/preview.svg";
 import logo from "../../assets/logo.svg";
 import Logo from "../icons/Logo";
 
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  User,
 } from "firebase/auth";
 import {
   useEffect,
@@ -21,8 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 
 function FirebaseWrapper({ children }: { children: ReactNode }) {
   const [isPending, startTransition] = useTransition();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,14 +71,14 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
 
   const handleSignIn = () => {
     startTransition(() => {
-      submitAction(); // Triggers the sign-in process
+      submitAction();
     });
   };
 
   if (loading) {
     return (
       <div className="w-full h-screen grid place-items-center">Loading...</div>
-    ); // Show loading while checking auth state
+    );
   }
 
   if (!user) {
@@ -89,7 +90,6 @@ function FirebaseWrapper({ children }: { children: ReactNode }) {
         >
           <div className="flex flex-col gap-y-2 items-center lg:items-start">
             <div className="flex gap-x-1 ">
-              {/* <img src={logo} alt="TaskBuddy"  /> */}
               <Logo className="h-8 w-8 fill-[#7b1984] " />
               <p className="text-[#7B1984] text-2xl font-[Urbanist] font-bold">
                 TaskBuddy

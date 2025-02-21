@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Grip, Check, Edit } from "@/components/icons";
+import { Grip, Check} from "@/components/icons";
 import { Trash2 } from "lucide-react";
 import { More } from "../icons";
 import useTask from "@/hooks/useTask";
@@ -26,6 +26,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "../ui/dialog";
+
 import { db, app } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -151,8 +152,8 @@ function ListItem({
       ref={setNodeRef}
       style={style}
     >
-      <div className="flex gap-x-2 md:gap-x-1 items-center w-3/4 md:w-2/5">
-        <Checkbox
+      <div className="flex gap-x-2 md:gap-x-1 items-center w-3/6 md:w-2/5">
+        {/* <Checkbox
           id={"task-checkbox-" + task.title}
           className="size-4 border-black/60 shadow-none "
           onClick={checkboxHandler}
@@ -160,7 +161,7 @@ function ListItem({
             state.selectedTasks.filter(({ title }) => title == title).length >
               0 && true
           }
-        />
+        /> */}
         <button {...attributes} {...listeners} ref={setActivatorNodeRef}>
           <Grip className="hidden md:block" />
         </button>
@@ -180,7 +181,7 @@ function ListItem({
           {task.title}
         </span>
       </div>
-      <div className="w-1/4 md:w-1/5 truncate">
+      <div className="w-2/6 md:w-1/5 truncate">
         {new Date().toLocaleDateString() == task.dueDate
           ? "Today"
           : new Date(task.dueDate)
@@ -232,8 +233,8 @@ function ListItem({
           </SelectContent>
         </Select>
       </div>
-      <div className="hidden md:flex w-1/5 justify-between pr-4">
-        <span className="font-mulish text-sm font-medium">{task.category}</span>
+      <div className=" w-1/6 md:w-1/5 md:flex justify-between pr-4">
+        <span className="hidden md:block font-mulish text-sm font-medium">{task.category}</span>
         <Popover>
           <PopoverTrigger>
             <span>

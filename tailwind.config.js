@@ -4,6 +4,9 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
     theme: {
     	extend: {
+		screens:{
+			"xs":"30rem"
+		},
         fontFamily:{
           "mulish": ["Mulish", "sans-serif"],
           "urbanist": ["Urbanist", "sans-serif"],

@@ -80,11 +80,11 @@ export function MainContext() {
             value={closeHandler()}
           >
             <div className="w-full h-10  flex items-center border-t ">
-              <div className="w-3/4 md:w-2/5 font-mulish font-bold text-sm text-[#666666] truncate">
+              <div className="w-3/6 md:w-2/5 font-mulish font-bold text-sm text-[#666666] truncate">
                 Task name
               </div>
               <div
-                className="flex w-1/4 md:w-1/5  gap-x-2 items-center cursor-pointer truncate"
+                className="flex w-2/6 md:w-1/5  gap-x-2 items-center cursor-pointer truncate"
                 onClick={() =>
                   dispatch({
                     type: "SORT_DATE",
