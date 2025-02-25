@@ -45,6 +45,16 @@ export function reducerFn(state: Task, action) {
           ({ title }) => title !== action.payload.taskTitle
         ),
       };
+    case "DUE_DATE":
+      return {
+        ...state,
+        dueDate: action.payload.value,
+      };
+    case "SELECTED_TASKS_RESET":
+      return {
+        ...state,
+        selectedTasks: [],
+      }
     default:
       console.log("this is from the default function");
       return state;

@@ -1,5 +1,5 @@
 import { Logo, List, Board, Logout, Search } from "../icons";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import useTask from "@/hooks/useTask";
 import { cn } from "@/lib/utils";
@@ -14,13 +14,29 @@ import {
 import TaskForm from "../Task/TaskCreation";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
+import { useQuery } from "@tanstack/react-query";
 
-import { signOut } from "firebase/auth";
+import { signOut, User } from "firebase/auth";
 import { FilterX } from "lucide-react";
+import { Auth } from "../authentication/RequestFunctions";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export function Header() {
   const [state, dispatch] = useTask();
+  const [dates, setDates] = useState([]);
   const { toast } = useToast();
+  const { data, isError } = useQuery({
+    queryKey: ["update"],
+    queryFn: getDates,
+  });
+
+  async function getDates() {
+    const docResults = await getDoc(
+      doc(db, "users", (Auth.currentUser as User).uid)
+    );
+    return docResults.data()?.todos;
+  }
 
   const resetHandler = () => {
     dispatch({
@@ -44,6 +60,18 @@ export function Header() {
       });
     });
   };
+
+  useEffect(() => {
+    if (data) {
+      const tasks = Object.values(data).flat();
+      setDates(() => {
+        const dates = tasks.map((task) => task.dueDate);
+        return [...new Set(dates)];
+      });
+    }
+  }, [data]);
+
+  console.log(state.dueDate);
 
   return (
     <header className=" flex flex-col justify-center  w-full gap-y-4  ">
@@ -108,7 +136,7 @@ export function Header() {
                 List
               </span>
             </button>
-            {/* <button
+            <button
               className={cn(
                 "flex gap-x-1 items-end mb-[1px]",
                 state.viewType === "board" && "border-b border-black mb-0"
@@ -128,7 +156,7 @@ export function Header() {
               >
                 Board
               </span>
-            </button> */}
+            </button>
           </div>
         </div>
 
@@ -171,22 +199,44 @@ export function Header() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <Select value={state.dueDate}>
+                <Select
+                  // value={state.dueDate}
+                  onValueChange={(value) => {
+                    dispatch({
+                      type: "DUE_DATE",
+                      payload: {
+                        value: value,
+                      },
+                    });
+                  }}
+                >
                   <SelectTrigger
+                    value={state.dueDate}
                     name="due-date-select-btn"
                     id="due-date-select"
                     className="h-7 md:h-8 rounded-full w-30 text-xs md:text-sm  font-[Mulish] font-semibold text-black/60 border border-black/20"
                   >
-                    <SelectValue placeholder="Due Date" />
+                    {state.dueDate ? state.dueDate : "Due Date"}
                   </SelectTrigger>
                   <SelectContent
                     className="text-sm font-[Mulish] font-semibold rounded-lg top-4 text-black/60 border border-black/20 "
                     sideOffset={-15}
                   >
                     <SelectGroup title="Due Date">
-                      <SelectItem value="apple">Today</SelectItem>
-                      <SelectItem value="banana">Tomorrow</SelectItem>
-                      <SelectItem value="banana">Yesterday</SelectItem>
+                      {dates.map((date) => {
+                        return (
+                          <SelectItem
+                            value={date}
+                            key={date}
+                            className={cn(
+                              "",
+                              state.dueDate !== date && "[&>#check]:hidden"
+                            )}
+                          >
+                            {(date as string).split("-").reverse().join("-")}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

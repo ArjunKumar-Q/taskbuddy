@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Grip, Check} from "@/components/icons";
+import { Grip, Check } from "@/components/icons";
 import { Trash2 } from "lucide-react";
 import { More } from "../icons";
 import useTask from "@/hooks/useTask";
@@ -134,20 +134,19 @@ function ListItem({
     }
   }
 
-  console.log(
-    state.selectedTasks.filter(({ title }) => title === title).length
-  );
+  console.log(state.selectedTasks.filter(({ title }) => task.title === title));
   return (
     <div
       className={cn(
         "h-12 w-full  border-b flex gap-x-2 items-center px-2",
         searchQuery !== undefined &&
-          !task.title.includes(searchQuery) &&
+          !task.title?.includes(searchQuery) &&
           "hidden",
         category !== undefined && category !== task.category && "hidden",
         dueDate !== undefined && dueDate !== task.dueDate && "hidden",
         borderless && "border-none",
-        isOverlay && "bg-white h-11 rounded-lg shadow-lg"
+        isOverlay && "bg-white h-11 rounded-lg shadow-lg",
+        isDragging && "cursor-grabbing"
       )}
       ref={setNodeRef}
       style={style}
@@ -158,8 +157,8 @@ function ListItem({
           className="size-4 border-black/60 shadow-none "
           onClick={checkboxHandler}
           checked={
-            state.selectedTasks.filter(({ title }) => title == title).length >
-              0 && true
+            state.selectedTasks.filter(({ title }) => task.title === title)
+              .length > 0 && true
           }
         /> */}
         <button {...attributes} {...listeners} ref={setActivatorNodeRef}>
@@ -212,29 +211,23 @@ function ListItem({
             className="text-sm font-[Mulish] bg-[#fff9f9] font-semibold rounded-lg top-4 text-black/60 border border-[#7B1984]/15 "
             sideOffset={-15}
           >
-            <SelectItem
-              className="[&>#check]:hidden focus:bg-[#ffe6e6]"
-              value="todo"
-            >
-              TODO
-            </SelectItem>
-            <SelectItem
-              className="[&>#check]:hidden focus:bg-[#ffe6e6]"
-              value="in-progress"
-            >
-              IN-PROGRESS
-            </SelectItem>
-            <SelectItem
-              className="[&>#check]:hidden focus:bg-[#ffe6e6]"
-              value="completed"
-            >
-              COMPLETED
-            </SelectItem>
+            {["todo", "in-progress", "completed"].map((item) => {
+              return (
+                <SelectItem
+                  className="[&>#check]:hidden focus:bg-[#ffe6e6]"
+                  value={item}
+                >
+                  {item.toUpperCase()}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
       <div className=" w-1/6 md:w-1/5 md:flex justify-between pr-4">
-        <span className="hidden md:block font-mulish text-sm font-medium">{task.category}</span>
+        <span className="hidden md:block font-mulish text-sm font-medium">
+          {task.category}
+        </span>
         <Popover>
           <PopoverTrigger>
             <span>

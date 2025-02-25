@@ -8,9 +8,17 @@ import { Button } from "../ui/button";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { app, db } from "@/firebase";
-import { arrayRemove, doc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { getAuth, User } from "firebase/auth";
 import { Task } from "../List/ListItem";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+} from "../ui/select";
 
 export function MainContext() {
   const [state, dispatch] = useTask();
@@ -25,12 +33,25 @@ export function MainContext() {
       toast({
         title: "Tasks Deleted Successfully",
       });
+      dispatch({
+        type: "SELECTED_TASKS_RESET",
+      });
     },
   });
 
   const { mutate: changeStatus } = useMutation({
-    mutationFn: updateStatus,
-    onSuccess: () => {},
+    mutationFn: statusChangeHandler,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todo"] });
+      queryClient.invalidateQueries({ queryKey: ["in-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["completed"] });
+      toast({
+        title: "Tasks status updated successfully",
+      });
+      dispatch({
+        type: "SELECTED_TASKS_RESET",
+      });
+    },
   });
 
   async function deleteHandler() {
@@ -50,12 +71,9 @@ export function MainContext() {
     });
     await updateDoc(doc(db, "users", (getAuth(app).currentUser as User).uid), {
       "todos.todo": arrayRemove(...tasks.todo),
-      "todos.in-progress": arrayRemove(...tasks["in-progress"]),
+      [`todos.${"in-progress"}`]: arrayRemove(...tasks["in-progress"]),
       "todos.completed": arrayRemove(...tasks.completed),
     });
-  }
-  async function updateStatus() {
-    // await update
   }
 
   function closeHandler() {
@@ -67,6 +85,44 @@ export function MainContext() {
       return ["Todo", "In-Progress", "Completed"];
     }
   }
+
+  async function statusChangeHandler(value: string) {
+    const tasks: { [key: string]: Task[] } = {
+      todo: [],
+      "in-progress": [],
+      completed: [],
+    };
+    state.selectedTasks.map((task: Task) => {
+      if (task.status === "todo") {
+        task.status = value;
+        tasks.todo.push(task);
+      } else if (task.status === "in-progress") {
+        task.status = value;
+        tasks["in-progress"].push(task);
+      } else {
+        task.status = value;
+        tasks.completed.push(task);
+      }
+    });
+
+    await updateDoc(doc(db, "users", (getAuth(app).currentUser as User).uid), {
+      "todos.todo": arrayRemove(...tasks.todo),
+    });
+    await updateDoc(doc(db, "users", (getAuth(app).currentUser as User).uid), {
+      [`todos.${"in-progress"}`]: arrayRemove(...tasks["in-progress"]),
+    });
+    await updateDoc(doc(db, "users", (getAuth(app).currentUser as User).uid), {
+      "todos.completed": arrayRemove(...tasks.completed),
+    });
+    await updateDoc(doc(db, "users", (getAuth(app).currentUser as User).uid), {
+      [`todos.${value}`]: arrayUnion(
+        ...tasks.todo,
+        ...tasks["in-progress"],
+        ...tasks.completed
+      ),
+    });
+  }
+
 
   if (state.viewType === "list") {
     return (
@@ -129,7 +185,7 @@ export function MainContext() {
               }}
             />
           </Accordion>
-          {state.selectedTasks.length > 0 && (
+          {/* {state.selectedTasks.length > 0 && (
             <div className="absolute h-fit  w-fit   bg-[#1A1C20] bottom-2 left-1/2 -translate-x-1/2 rounded-xl flex flex-col sm:flex-row items-center justify-between p-2 gap-2">
               <div className="flex w-56 h-10 rounded-full items-center gap-x-4 font-mulish font-semibold text-white border border-white px-4">
                 <span className="w-4/5">
@@ -138,12 +194,29 @@ export function MainContext() {
                 <X className="size-4" />
               </div>
               <div className="flex gap-x-3">
-                <Button
-                  className="bg-[#2a2b2f] border border-[#8D8A8A24] text-white font-mulish font-semibold text-xs rounded-full"
-                  variant={"outline"}
-                >
-                  Status
-                </Button>
+                <Select onValueChange={changeStatus}>
+                  <SelectTrigger className="bg-[#2a2b2f] border border-[#8D8A8A24] text-white font-mulish font-semibold text-xs rounded-full [&>svg]:hidden">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent
+                    side="top"
+                    className="w-44 bg-[#1A1C20] p-1 "
+                    sideOffset={10}
+                  >
+                    <SelectGroup>
+                      {["todo", "in-progress", "completed"].map((item) => {
+                        return (
+                          <SelectItem
+                            value={item}
+                            className="[&>#check]:hidden text-white"
+                          >
+                            {item.toUpperCase()}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <Button
                   className="bg-[#3a1f23] text-[#E13838] border border-[#FF353524] font-mulish font-semibold text-xs rounded-full hover:bg-[#48282d] hover:text-[#E13838]"
                   variant={"outline"}
@@ -152,7 +225,7 @@ export function MainContext() {
                 </Button>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </>
     );

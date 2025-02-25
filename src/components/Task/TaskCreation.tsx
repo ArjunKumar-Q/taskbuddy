@@ -88,7 +88,7 @@ const TaskForm = () => {
     });
   }
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (
       formState.title === undefined ||

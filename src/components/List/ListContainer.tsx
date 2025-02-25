@@ -122,12 +122,16 @@ export function ListContainer({ meta }: { meta: MetaData }) {
           className={cn(
             "border-none",
             state.searchQuery !== undefined &&
-              tasks.filter((item) => item.title.includes(state.searchQuery))
+              tasks.filter((item) => item.title?.includes(state.searchQuery))
                 .length === 0 &&
               "hidden",
             state.category !== undefined &&
               tasks.filter((item) => item.category === state.category)
                 .length === 0 &&
+              "hidden",
+            state.dueDate !== undefined &&
+              tasks.filter((item) => item.dueDate === state.dueDate).length ===
+                0 &&
               "hidden"
           )}
         >

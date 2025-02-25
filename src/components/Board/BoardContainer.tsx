@@ -4,10 +4,12 @@ import { cn } from "@/lib/utils";
 import BoardItem from "./BoardItem";
 import { useEffect, useState } from "react";
 import { MetaData } from "../List/ListContainer";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../authentication/RequestFunctions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Auth, getTasks } from "../authentication/RequestFunctions";
 import { Task } from "../List/ListItem";
 import { LoaderCircle } from "lucide-react";
+import { User } from "firebase/auth";
+import { updateDoc, doc } from "firebase/firestore";
 
 export function BoardContainer({ meta }: { meta: MetaData }) {
   const { title, bgColor, queryToken } = meta;
@@ -21,10 +23,24 @@ export function BoardContainer({ meta }: { meta: MetaData }) {
     task: null,
   });
 
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: [queryToken],
     queryFn: () => getTasks(queryToken),
   });
+
+  const { mutate } = useMutation({
+    mutationFn: updatePositions,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryToken] });
+    },
+  });
+
+  async function updatePositions(updatedArray: Task[]) {
+    await updateDoc(doc(db, "users", (Auth.currentUser as User).uid), {
+      [`todos.${queryToken}`]: updatedArray,
+    });
+  }
 
   useEffect(() => {
     console.log(data);
@@ -36,7 +52,7 @@ export function BoardContainer({ meta }: { meta: MetaData }) {
   return (
     <DndContext
       onDragStart={({ active }) => {
-        console.log(active);
+        console.log(active.data.current);
         setIsDragging({
           active: true,
           task: tasks.filter(({ title }) => active.id === title)[0],
@@ -44,15 +60,16 @@ export function BoardContainer({ meta }: { meta: MetaData }) {
       }}
       onDragEnd={(event) => {
         const { active, over } = event;
-        console.log(active, over);
 
         if (active.id !== over?.id) {
-          setTasks((tasks) => {
-            const oldIndex = tasks.indexOf(active?.id);
-            const newIndex = tasks.indexOf(over?.id);
-            console.log(oldIndex, newIndex);
-
-            return arrayMove(tasks, oldIndex, newIndex);
+          setTasks((items) => {
+            const oldIndex = items.findIndex(
+              (item) => item.title === active?.id
+            );
+            const newIndex = items.findIndex((item) => item.title === over?.id);
+            const updatedArray = arrayMove(items, oldIndex, newIndex);
+            mutate(updatedArray);
+            return updatedArray;
           });
         }
       }}
@@ -94,7 +111,7 @@ export function BoardContainer({ meta }: { meta: MetaData }) {
         <div className="my-4"></div>
       </div>
       <DragOverlay>
-        {isDragging.active && <BoardItem task={isDragging.task as Task} />}
+        {isDragging.active && <BoardItem task={isDragging.task as Task} overlay />}
       </DragOverlay>
     </DndContext>
   );
